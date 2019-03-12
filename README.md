@@ -17,6 +17,11 @@ Be patient, VM progress will be seen shortly
 #### Grab and record their IP's
 ```virsh console xyz...```
 (Automate eventually)
+E.g:
+
+kolla-controller: 192.168.3.142
+kolla-compute1:   192.168.3.143
+kolla-compute2:   192.168.3.144
 
 ### Install a second interface on each VM using VLAN's 
 ```
@@ -41,15 +46,14 @@ sudo systemctl status networking.service
 _First VM will be a controller and we'll run kolla from this one_
 ```
 ssh-keygen
-ssh-copy-id stack@192.168.3.136
-ssh-copy-id stack@192.168.3.135
+ssh-copy-id stack@192.168.3.143
+ssh-copy-id stack@192.168.3.144
 ```
 
 #### Install pip on controller or local
 ```
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 sudo python get-pip.py
-#pip install --upgrade --force-reinstall pip==9.0.3
 sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools -y
 sudo apt update
 ```

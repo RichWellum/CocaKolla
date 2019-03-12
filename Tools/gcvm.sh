@@ -295,6 +295,18 @@ apt-get install apparmor -y
 apt-get install git -y
 hostname -I > /tmp/$NAME-ip.txt
 
+# Add a second interface via vlan
+apt-get install vlan -y
+su -c 'echo "8021q" >> /etc/modules'
+tee -a /etc/network/interfaces << END
+
+auto ens2.222
+iface ens2.222 inet static
+       address 10.10.10.1
+       netmask 255.255.255.0
+       vlan-raw-device ens2
+END
+
 echo GRUB_CMDLINE_LINUX=\'console=tty0 console=ttyS0,19200n8\' >> /etc/default/grub; \
 echo GRUB_TERMINAL=serial >> /etc/default/grub; \
 echo GRUB_SERIAL_COMMAND=\'serial --speed=19200 --unit=0 --word=8 --parity=no --stop=1\' >> /etc/default/grub; \
