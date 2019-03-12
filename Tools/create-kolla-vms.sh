@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to spin up three VM's using gcvm.sh
+# Script to spin up four VM's using gcvm.sh
 # set -xe
 
 # DEFAULTS
@@ -8,22 +8,16 @@ NAME="ERROR"
 
 function usage {
     echo
-    echo "A tool to create 3 VM's - one controller, and two computes"
+    echo "A tool to create 4 VM's for a Kolla dev environment - one jump server. one controller, and two computes"
     echo
     echo " -n name of VMs"
     echo " -v verbose"
     echo " -c cleanup"
     echo
-    echo "E.g. 3-vms.sh -n rich -v"
-    echo "E.g. 3-vms.sh -n rich -c"
+    echo "E.g. create-kolla-vms.sh -n rich -v"
+    echo "E.g. create-kolla-vms.sh -n rich -c"
     echo
     exit 1
-}
-
-function create_vm () {
-    echo Creating VM $1
-    /home/$USER/CocaKolla/Tools/gcvm.sh -n $1 -e DEMUC-Lab-Network -f
-    sleep 5
 }
 
 function check_vm () {
@@ -56,9 +50,10 @@ do
             NAME=$2
             ;;
         -c | --cleanup )
-            cleanup $NAME-controller
-            cleanup $NAME-compute1
-            cleanup $NAME-compute2
+            cleanup $NAME-kolla-jump-host
+            cleanup $NAME-kolla-controller
+            cleanup $NAME-kolla-compute1
+            cleanup $NAME-kolla-compute2
             exit 0
             ;;
         -v | --verbose )
@@ -77,21 +72,25 @@ if [[ $NAME == "ERROR" ]]; then
     exit 1
 fi
 
-echo "Creating 3 VM's"
-echo "$NAME-controller, $NAME-compute1, $NAME-compute2"
+echo "Creating 4 VM's for a Kolla Installation"
+echo "$NAME-jump-host, $NAME-controller, $NAME-compute1, $NAME-compute2"
 echo "Be patient, VM progress will be seen shortly"
 
 # Create a VM in the background but also ignore anaconda
-/home/$USER/CocaKolla/gcvm.sh -n $NAME-controller -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/gcvm.sh -n $NAME-kolla-jump-host -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-compute1 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/gcvm.sh -n $NAME-kolla-controller -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-compute2 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-compute1 -f  > /dev/null 2>&1 < /dev/null &
+sleep 60
+/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-compute2 -f  > /dev/null 2>&1 < /dev/null &
 
-check_vm $NAME-controller
-check_vm $NAME-compute1
-check_vm $NAME-compute2
+check_vm $NAME-kolla-jump-host
+check_vm $NAME-kolla-controller
+check_vm $NAME-kolla-compute1
+check_vm $NAME-kolla-compute2
 
-inspect_ip $NAME-controller
-inspect_ip $NAME-compute1
-inspect_ip $NAME-compute2
+inspect_ip $NAME-kolla-jump-host
+inspect_ip $NAME-kolla-controller
+inspect_ip $NAME-kolla-compute1
+inspect_ip $NAME-kolla-compute2

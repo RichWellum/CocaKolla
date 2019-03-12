@@ -23,6 +23,11 @@ kolla-controller: 192.168.3.142
 kolla-compute1:   192.168.3.143
 kolla-compute2:   192.168.3.144
 
+Add the following to /etc/hosts
+192.168.3.142   kolla-controller
+192.168.3.143   kolla-compute1
+192.168.3.144   kolla-compute2
+
 ### Install a second interface on each VM using VLAN's 
 ```
 sudo apt-get install vlan -y
@@ -46,6 +51,7 @@ sudo systemctl status networking.service
 _First VM will be a controller and we'll run kolla from this one_
 ```
 ssh-keygen
+ssh-copy-id stack@192.168.3.142
 ssh-copy-id stack@192.168.3.143
 ssh-copy-id stack@192.168.3.144
 ```
@@ -64,7 +70,7 @@ sudo apt install software-properties-common -y
 sudo apt-add-repository ppa:ansible/ansible -y
 sudo apt update
 sudo apt install ansible -y
-tee -a /etc/ansible/ansible.cfg << END
+sudo tee -a /etc/ansible/ansible.cfg << END
 
 [defaults]
 host_key_checking=False
@@ -75,20 +81,14 @@ END
 
 #### Install latest Kolla
 ```
-sudo pip install git+https://github.com/openstack/kolla-ansible@master
-#git clone https://github.com/openstack/kolla
-#git clone https://github.com/openstack/kolla-ansible
-#pip install -r kolla/requirements.txt
-#pip install -r kolla-ansible/requirements.txt
-#sudo mkdir -p /etc/kolla
-#sudo cp -r kolla-ansible/etc/kolla/* /etc/kolla
-#sudo cp kolla-ansible/ansible/inventory/* .
-sudo mkdir -p /etc/kolla/config/inventory
-sudo cp -r /usr/share/kolla-ansible/etc_examples/kolla/* /etc/kolla/
-sudo cp /usr/share/kolla-ansible/ansible/inventory/* /etc/kolla/config/inventory
+git clone https://github.com/openstack/kolla
+git clone https://github.com/openstack/kolla-ansible
+sudo -H pip install -r kolla/requirements.txt --ignore-installed PyYAML
+sudo -H pip install -r kolla-ansible/requirements.txt --ignore-installed PyYAML
+sudo mkdir -p /etc/kolla
+sudo cp -r kolla-ansible/etc/kolla/* /etc/kolla
+sudo cp kolla-ansible/ansible/inventory/* .
 ```
-Put this into /etc/hosts:
-```openstack server list -f value -c Name -c Networks |awk -F " ctlplane="'{print $1 " " $2}'```
 
 #### optionally download kolla tarballs and store in local reg
 ```
@@ -98,7 +98,7 @@ docker image load -i kolla_images_master.tar
 for i in $(docker images --format"{{.Repository}}"); do  docker tag$i:master 172.31.0.1:8787/$i:master; docker push 172.31.0.1:8787/$i:master;
 done
 ```
-### Run kolla-asible
+### Run kolla-ansible
 
 #### Update Multinode role something like this:
 ```
@@ -174,3 +174,6 @@ sudo usermod -aG docker $USER
 
 #### Finally proceed to actual OpenStack deployment:
 ./kolla-ansible/tools/kolla-ansible -i multinode deploy
+
+Put this into /etc/hosts:
+```openstack server list -f value -c Name -c Networks |awk -F " ctlplane="'{print $1 " " $2}'```
