@@ -5,7 +5,7 @@ A breakdown into how to configure Kolla on different hardware and VM's
 Example: Creating a 3-node OpenStack cluster, 1 controller - 2 computes
 
 ### Create three VM's
- ```./k8s-mvp/VM/3-vms.sh -n kolla-example```
+ ```./CocaKolla/Tools/3-vms.sh -n kolla```
 (wait a long time for all three to be prepared....)
 
 E.g.
