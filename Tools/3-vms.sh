@@ -82,11 +82,11 @@ echo "$NAME-controller, $NAME-compute1, $NAME-compute2"
 echo "Be patient, VM progress will be seen shortly"
 
 # Create a VM in the background but also ignore anaconda
-./CocaKolla/Tools/gcvm.sh -n $NAME-controller -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/gcvm.sh -n $NAME-controller -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-./CocaKolla/Tools/gcvm.sh -n $NAME-compute1 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-compute1 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-./CocaKolla/Tools/gcvm.sh -n $NAME-compute2 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-compute2 -e DEMUC-Lab-Network -f  > /dev/null 2>&1 < /dev/null &
 
 check_vm $NAME-controller
 check_vm $NAME-compute1
