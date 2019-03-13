@@ -4,14 +4,14 @@ A breakdown into how to configure Kolla on different hardware and VM's
 ## VM example
 Example: Creating a 3-node OpenStack cluster, 1 controller - 2 computes
 
-### Create three VM's
- ```./CocaKolla/Tools/3-vms.sh -n kolla```
+### Create Kolla VMs
+ ```./CocaKolla/Tools/create-kolla-vms.sh -n kolla```
 (wait a long time for all three to be prepared....)
 
 E.g.
-$ ./CocaKolla/Tools/3-vms.sh -n rich
+$ ./CocaKolla/Tools/create-kolla-vms.sh -n '' #Add a name or identifier if needed
 Creating 3 VM's
-rich-controller, rich-compute1, rich-compute2
+kolla-jump-host, kolla-controller, kolla-compute1, kolla-compute2
 Be patient, VM progress will be seen shortly
 
 #### Grab and record their IP's
@@ -23,12 +23,9 @@ kolla-controller: 192.168.3.142
 kolla-compute1:   192.168.3.143
 kolla-compute2:   192.168.3.144
 
-Add the following to /etc/hosts
-192.168.3.142   kolla-controller
-192.168.3.143   kolla-compute1
-192.168.3.144   kolla-compute2
+### Install a second interface on each VM using VLAN's
+_Note gcvm does this automatically_
 
-### Install a second interface on each VM using VLAN's 
 ```
 sudo apt-get install vlan -y
 sudo su -c 'echo "8021q" >> /etc/modules'
@@ -45,21 +42,29 @@ sudo systemctl status networking.service
 ```
 ```ip r ## show routing info ##```
 ### Install kolla-ansible (quick start)
+Roughly based on:
 [kolla quick start](https://docs.openstack.org/kolla-ansible/latest/user/quickstart.html)
+_Operatng from the jump-host VM now_
+
+#### Add the VM's IP's to /etc/hosts
+```
+192.168.3.142   kolla-controller
+192.168.3.143   kolla-compute1
+192.168.3.144   kolla-compute2
+```
 
 #### Copy keys to all VM's (Maybe optional)
-_First VM will be a controller and we'll run kolla from this one_
 ```
 ssh-keygen
-ssh-copy-id stack@192.168.3.142
-ssh-copy-id stack@192.168.3.143
-ssh-copy-id stack@192.168.3.144
+ssh-copy-id stack@kolla-controller
+ssh-copy-id stack@kolla-compute1
+ssh-copy-id stack@kolla-compute2
 ```
 
 #### Install pip on controller or local
 ```
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-sudo python get-pip.py
+sudo -H python get-pip.py
 sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools -y
 sudo apt update
 ```
@@ -83,7 +88,7 @@ END
 ```
 git clone https://github.com/openstack/kolla
 git clone https://github.com/openstack/kolla-ansible
-sudo -H pip install -r kolla/requirements.txt --ignore-installed PyYAML
+#sudo -H pip install -r kolla/requirements.txt --ignore-installed PyYAML
 sudo -H pip install -r kolla-ansible/requirements.txt --ignore-installed PyYAML
 sudo mkdir -p /etc/kolla
 sudo cp -r kolla-ansible/etc/kolla/* /etc/kolla
@@ -101,24 +106,28 @@ done
 ### Run kolla-ansible
 
 #### Update Multinode role something like this:
+_Note: could put every node in every category for all-in-one across all nodes
 ```
 [control]
 # These hostname must be resolvable from your deployment host
-192.168.3.135 ansible_user=stack ansible_become_pass=stack
+kolla-controller ansible_user=stack ansible_become_pass=stack
 
 [network:children]
 control
 
 [compute]
-192.168.3.136 ansible_user=stack ansible_become_pass=stack
+kolla-compute1 ansible_user=stack ansible_become_pass=stack
+kolla-compute2 ansible_user=stack ansible_become_pass=stack
 
 [monitoring]
-192.168.3.135 ansible_user=stack ansible_become_pass=stack
+kolla-controller ansible_user=stack ansible_become_pass=stack
 
 [storage:children]
 compute
 ```
+
 Or:
+
 ```
 [control]
 
@@ -155,11 +164,20 @@ localhost       ansible_connection=local
 ```ansible -i multinode all -m ping```
 
 #### Generate password
-```sudo ./generate_passwords.py```
+```sudo ./kolla-ansible/tools/generate_passwords.py```
 
 #### Modify /etc/kolla/globals.yml as quickstart directs
+1. Set kolla_internal_vip_address to the IP of your main interface but also
+set enable_haproxy to no in "OpenStack options" section (note this is without haproxy and keep alive),
+otherwise set it to a spare ip address on your network.
+2. Set: network_interface: "ens2"
+3. Set: neutron_external_interface: "ens2.222"
+4. Set: enable_haproxy: "no" #(if you use kolla_internal_vip_address at main mgmt ip addr)
+5. Optionally set: kolla_base_distro: "ubuntu"
+6. Optionally set: kolla_install_type: "source" #source is often more stable
 
-#### Enable docker for non-root on each node:
+#### Enable docker for non-root on each node (including jump-host):
+_May be optional - done by kolla-ansible_
 ```
 sudo groupadd docker
 sudo usermod -aG docker $USER
