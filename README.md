@@ -191,6 +191,8 @@ sudo usermod -aG docker $USER
 ./kolla-ansible/tools/kolla-ansible -i multinode prechecks
 
 #### Finally proceed to actual OpenStack deployment:
+_Note: on Ubuntu Controller you need to edit /etc/hosts and remove this line:
+```# 127.0.1.1     kolla-controller```
 ./kolla-ansible/tools/kolla-ansible -i multinode deploy
 
 Put this into /etc/hosts:
