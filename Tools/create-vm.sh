@@ -278,6 +278,7 @@ python-apt
 lshw
 lldpd
 dmidecode
+python-openstackclient
 
 %post
 # add normal apt source list

@@ -6,11 +6,13 @@ Example: Creating a 3-node OpenStack cluster, 1 controller - 2 computes
 
 ### Create Kolla VMs
  ```./CocaKolla/Tools/create-kolla-vms.sh -n kolla```
+
 (wait a long time for all three to be prepared....)
 
 E.g.
 $ ./CocaKolla/Tools/create-kolla-vms.sh -n '' #Add a name or identifier if needed
-Creating 3 VM's
+
+Creating 4 VM's:
 kolla-jump-host, kolla-controller, kolla-compute1, kolla-compute2
 Be patient, VM progress will be seen shortly
 
@@ -40,10 +42,13 @@ END
 sudo systemctl restart networking
 sudo systemctl status networking.service
 ```
+
 ```ip r ## show routing info ##```
+
 ### Install kolla-ansible (quick start)
 Roughly based on:
 [kolla quick start](https://docs.openstack.org/kolla-ansible/latest/user/quickstart.html)
+
 _Operatng from the jump-host VM now_
 
 #### Add the VM's IP's to /etc/hosts
@@ -103,10 +108,12 @@ docker image load -i kolla_images_master.tar
 for i in $(docker images --format"{{.Repository}}"); do  docker tag$i:master 172.31.0.1:8787/$i:master; docker push 172.31.0.1:8787/$i:master;
 done
 ```
+
 ### Run kolla-ansible
 
 #### Update Multinode role something like this:
 _Note: could put every node in every category for all-in-one across all nodes
+
 ```
 [control]
 # These hostname must be resolvable from your deployment host
@@ -126,40 +133,6 @@ kolla-controller ansible_user=stack ansible_become_pass=stack
 compute
 ```
 
-Or:
-
-```
-[control]
-
-overcloud-kolla-0 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-1 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-2 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-
-[network]
-overcloud-kolla-0 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-1 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-2 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-
-[compute]
-overcloud-kolla-0 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-1 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-2 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-3 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-
-[storage]
-overcloud-kolla-0 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-1 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-2 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-
-[monitoring]
-overcloud-kolla-0 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-1 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-overcloud-kolla-2 ansible_user=cbis-admin ansible_become=True ansible_ssh_private_key_file=/home/stack/.ssh/id_rsa
-
-[deployment]
-localhost       ansible_connection=local
-```
-
 #### Test conectivity
 ```ansible -i multinode all -m ping```
 
@@ -167,23 +140,18 @@ localhost       ansible_connection=local
 ```sudo ./kolla-ansible/tools/generate_passwords.py```
 
 #### Modify /etc/kolla/globals.yml as quickstart directs
-1. Set kolla_internal_vip_address to the IP of your main interface but also
-set enable_haproxy to no in "OpenStack options" section (note this is without haproxy and keep alive),
-otherwise set it to a spare ip address on your network.
-2. Set: network_interface: "ens2"
-3. Set: neutron_external_interface: "ens2.222"
-4. Set: enable_haproxy: "no" #(if you use kolla_internal_vip_address at main mgmt ip addr)
-5. Optionally set: kolla_base_distro: "ubuntu"
+1. Set: kolla_install_type: "source"
+2. Set kolla_internal_vip_address to a spare IP address in your network.
+3. Set: network_interface: "ens2"
+4. Set: neutron_external_interface: "ens2.222"
+5. Optionally set: enable_haproxy: "no" #(if you use kolla_internal_vip_address at main mgmt ip addr)
 6. Optionally set: kolla_install_type: "source" #source is often more stable
 
-#### Enable docker for non-root on each node (including jump-host):
-_May be optional - done by kolla-ansible_
+#### Enable docker for non-root on each node
 ```
 sudo groupadd docker
 sudo usermod -aG docker $USER
 ```
-#### logout and in again
-
 #### Bootstrap servers with kolla deploy dependencies:
 ./kolla-ansible/tools/kolla-ansible -i multinode bootstrap-servers
 
@@ -191,9 +159,28 @@ sudo usermod -aG docker $USER
 ./kolla-ansible/tools/kolla-ansible -i multinode prechecks
 
 #### Finally proceed to actual OpenStack deployment:
-_Note: on Ubuntu Controller you need to edit /etc/hosts and remove this line:
+_Note: on Ubuntu Controller you need to edit /etc/hosts and remove this line:_
 ```# 127.0.1.1     kolla-controller```
+
 ./kolla-ansible/tools/kolla-ansible -i multinode deploy
+
+#### Install openstack client
+sudo -H pip install python-openstackclient python-glanceclient python-neutronclient
+
+#### Do post deploy steps
+```
+cd kolla-ansible/tools
+./kolla-ansible post-deploy
+. /etc/kolla/admin-openrc.sh
+```
+
+#### Install correct version of openssl
+sudo rm -rf /usr/lib/python2.7/dist-packages/OpenSSL
+sudo rm -rf /usr/lib/python2.7/dist-packages/pyOpenSSL-0.15.1.egg-info
+sudo pip install pyopenssl
+
+#### Set up basic networks, images etc
+. kolla-ansible/tools/init-runonce
 
 Put this into /etc/hosts:
 ```openstack server list -f value -c Name -c Networks |awk -F " ctlplane="'{print $1 " " $2}'```

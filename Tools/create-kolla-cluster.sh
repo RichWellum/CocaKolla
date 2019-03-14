@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to spin up four VM's using gcvm.sh
+# Script to spin up four VM's using create-vm.sh.sh
 # set -xe
 
 # DEFAULTS
@@ -33,11 +33,11 @@ function check_vm () {
 }
 
 function inspect_ip () {
-    /home/$USER/CocaKolla/Tools/gcvm.sh -i $1
+    /home/$USER/CocaKolla/Tools/create-vm.sh.sh -i $1
 }
 
 function cleanup () {
-    /home/$USER/CocaKolla/Tools/gcvm.sh -k $1 -f
+    /home/$USER/CocaKolla/Tools/create-vm.sh.sh -k $1 -f
     echo VMs $1 cleaned up
     echo
 }
@@ -77,13 +77,13 @@ echo "$NAME-jump-host, $NAME-controller, $NAME-compute1, $NAME-compute2"
 echo "Be patient, VM progress will be seen shortly"
 
 # Create a VM in the background but also ignore anaconda
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-jump-host -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/create-vm.sh.sh -n $NAME-kolla-jump-host -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-controller -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/create-vm.sh.sh -n $NAME-kolla-controller -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-compute1 -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/create-vm.sh.sh -n $NAME-kolla-compute1 -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-/home/$USER/CocaKolla/Tools/gcvm.sh -n $NAME-kolla-compute2 -f  > /dev/null 2>&1 < /dev/null &
+/home/$USER/CocaKolla/Tools/create-vm.sh.sh -n $NAME-kolla-compute2 -f  > /dev/null 2>&1 < /dev/null &
 
 check_vm $NAME-kolla-jump-host
 check_vm $NAME-kolla-controller
