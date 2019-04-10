@@ -184,6 +184,19 @@ network --bootproto=dhcp --device=eth0 --hostname $NAME
 #network --onboot=on --bootproto=static --ip=172.31.255.2 --netmask=255.255.224.0 --device=eth0
 #network --onboot=on --bootproto=static --ip=135.227.133.15 --netmask=255.255.255.128 --gateway=135.227.133.1 --device=eth1
 
+#Create a VLAn for neutron
+modprobe 8021q
+tee -a /etc/sysconfig/network-scripts/ifcfg-eth0.10 << END
+DEVICE=eth0.10
+BOOTPROTO=none
+ONBOOT=yes
+#IPADDR=14.1.1.31
+#NETMASK=255.255.255.0
+USERCTL=no
+#NETWORK=14.1.1.0
+VLAN=yes
+END
+
 %packages --nobase --ignoremissing
 openssh-server
 curl
