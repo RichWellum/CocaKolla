@@ -3,11 +3,10 @@
 # set -xe
 
 # DEFAULTS
-NAME="gcvm-noname-$RANDOM-delete"
+NAME="vm-noname-$RANDOM-delete"
 VCPUS=4
 SIZE=50
 RAM=10240
-# NETWORK="DEMUC-Lab-Network"
 NETWORK="default"
 DISTRO="ubuntu16"
 FORCE="FALSE"
@@ -183,6 +182,14 @@ user --name=stack --groups=wheel --plaintext --password=stack
 #network --onboot=on --bootproto=static --ip=135.227.133.15 --netmask=255.255.255.128 --gateway=135.227.133.1 --device=eth1
 
 %packages --nobase --ignoremissing
+openssh-server
+curl
+wget
+acpid
+python-apt
+lshw
+lldpd
+dmidecode
 @core
 %end
 
