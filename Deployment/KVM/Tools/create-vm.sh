@@ -177,6 +177,9 @@ logvol / --fstype xfs --name=lv01 --vgname=rootvg01 --size=1 --grow
 rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib109TfUgXSXCHbTJB0tJNqPACrt4n.3EMWbPyOEe/VfIJT0
 user --name=stack --groups=wheel --plaintext --password=stack
 
+#Network information
+network --bootproto=dhcp --device=eth0 --hostname $NAME
+
 #Static nw
 #network --onboot=on --bootproto=static --ip=172.31.255.2 --netmask=255.255.224.0 --device=eth0
 #network --onboot=on --bootproto=static --ip=135.227.133.15 --netmask=255.255.255.128 --gateway=135.227.133.1 --device=eth1
