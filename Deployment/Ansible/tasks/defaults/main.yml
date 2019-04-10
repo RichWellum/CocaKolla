@@ -1,0 +1,7 @@
+---
+# defaults file for kolla-qs
+ansible_user: "stack" 
+ansible_become_pass: "stack"
+#"controller01": "192.168.3.135"
+compute01: "192.168.3.136"
+compute02: "192.168.3.137"

@@ -1,0 +1,158 @@
+---
+# tasks file for kolla-qs (.ssh/config StrictHostKeyChecking no)
+
+# Copy public keys to all hosts
+- hosts: all
+  gather_facts: no
+  tasks:
+    - set_fact:
+        rem_user: "stack"
+        rem_host: "{{ ansible_host }}"
+    - local_action: command ssh-copy-id -i ~/.ssh/id_rsa.pub {{ rem_user }}@{{ rem_host }} -f
+    - setup:
+
+# Install necessary packages
+- hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Install list of packages
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+         - vlan
+         - python-minimal
+         - python-dev
+         - libffi-dev
+         - gcc
+         - libssl-dev
+         - python-selinux
+         - python-setuptools
+         - git
+
+- hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+    - name: line insert
+      lineinfile:
+        path: /etc/modules
+        line: '8021q'
+
+# Add Vlan interfaces
+- hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+  - name: add vlan interfaces
+    blockinfile:
+      path: /etc/network/interfaces
+      block: |
+        auto ens2.222
+        iface ens2.222 inet static
+            address 10.10.10.1
+            netmask 255.255.255.0
+            vlan-raw-device ens2
+
+# Restart networks to pick up vlans
+- hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Restart Network
+    command: systemctl restart networking
+
+# Install pip on controller(s)
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Download pip
+    get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/tmp/get-pip.py
+
+  - name: Execute the get-pip.py installer
+    shell: python /tmp/get-pip.py
+
+  - name: Remove the pip installer
+    file: path=/tmp/get-pip.py state=absent
+
+# Todo - do I need to install ansible on Controller or does Kolla do that?
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Install ansible
+    shell: |
+      apt install software-properties-common -y
+      apt-add-repository ppa:ansible/ansible -y
+      apt update
+      apt install ansible -y
+  - name: Change ansible config
+    blockinfile:
+      path: /etc/ansible/ansible.cfg
+      block: |
+        [defaults]
+        host_key_checking=False
+        pipelining=True
+        forks=100
+
+# Install kolla on controller
+# Nasty shell
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Install Kolla
+    shell: |
+      pip install git+https://github.com/openstack/kolla@master
+      pip install git+https://github.com/openstack/kolla-ansible@master
+      mkdir -p /etc/kolla
+      cp -r kolla-ansible/etc/kolla/* /etc/kolla
+      cp kolla-ansible/ansible/inventory/* .
+
+# Update multinode
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Copying over docker conf files for services
+    template:
+      src: "multinode.j2"
+      dest: "multinode.new"
+      mode: "0660"
+
+# Check connectvity from Controller
+#- hosts: control
+#  become: True
+#  gather_facts: False
+#  tasks:
+#  - name: Check connectivity
+#    command: ansible -i multinode.new all -m ping
+
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Generate passwords
+    command: /home/stack/kolla-ansible/tools/generate_passwords.py
+
+- hosts: all
+  become: True
+  gather_facts: false
+  tasks:
+  - name: enable docker
+    shell: |
+      groupadd docker
+      usermod -aG docker stack
+
+- hosts: control
+  become: True
+  gather_facts: false
+  tasks:
+  - name: Bootstrap servers with kolla deploy dependencies 
+    command: /home/stack/kolla-ansible/tools/kolla-ansible -i /home/stack/multinode.new bootstrap-servers 
+
+
+
+...
