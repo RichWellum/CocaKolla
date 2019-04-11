@@ -175,20 +175,22 @@ ssh-copy-id stack@rich-kolla-controller03
 ssh-copy-id stack@rich-kolla-compute01
 ```
 
-## jump-host: Install pip and other packages
+### From quick guide
+# Install Dependencies
 ```
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-sudo -H python get-pip.py
-sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux python-setuptools -y
-sudo -H pip install -U python-openstackclient --ignore-installed PyYAML
+sudo yum install epel-release -y
+sudo yum install python-devel libffi-devel gcc openssl-devel libselinux-python -y
+sudo yum install python-pip -y
+sudo -H pip install -U pip
+
+#curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+#sudo -H python get-pip.py
 ```
 
 ## jump-host: Install ansible
 ```
-sudo apt install software-properties-common -y
-sudo apt-add-repository ppa:ansible/ansible -y
-sudo apt update
-sudo apt install ansible -y
+#sudo -H pip install ansible
+sudo yum install ansible
 ```
 
 ## jump-host: Configure ansible
