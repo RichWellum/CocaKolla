@@ -58,6 +58,7 @@ do
             OS=$2
             ;;
         -c | --cleanup )
+            NAME=$2-kolla
             cleanup $NAME-jump-host
             cleanup $NAME-controller01
             cleanup $NAME-controller02
