@@ -177,21 +177,17 @@ ssh-copy-id stack@rich-kolla-compute01
 
 ## jump-host: Install pip and other packages
 ```
-#curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-#sudo -H python get-pip.py
 sudo yum -y install epel-release
 sudo yum -y install python-devel libffi-devel gcc openssl-devel libselinux-python
 sudo yum -y install python-pip git
 sudo pip install -U pip
 sudo yum -y install ansible
-
-
 ```
 
 ## jump-host: Install kolla-ansible
 ```
 sudo pip install -I setuptools
-sudo pip install kolla-ansible --ignore-installed PyYAML
+sudo pip install git+https://github.com/openstack/kolla-ansible@master --ignore-installed PyYAML
 sudo mkdir -p /etc/kolla
 sudo chown $USER:$USER /etc/kolla
 sudo cp -r /usr/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
@@ -218,7 +214,7 @@ _Note: could put every node in every category for all-in-one across all nodes_
 _Also Note the 'children' changes_
 
 ```
-sudo vi multinode
+sudo vi /etc/kolla/multinode
 
 [control]
 rich-kolla-controller[01:03] ansible_user=stack ansible_become_pass=stack
@@ -238,14 +234,14 @@ compute
 
 ## Test conectivity to all Nodes
 ```
-ansible -i multinode all -m ping
+ansible -i /etc/kolla/multinode all -m ping
 ```
 
 ## Generate password
 _This is a development and therefore insecure step only_
 
 ```
-sudo ./kolla-ansible/tools/generate_passwords.py
+sudo kolla-genpwd
 ```
 
 ## Modify /etc/kolla/globals.yml as quickstart directs
@@ -261,23 +257,23 @@ sudo vi /etc/kolla/globals.yml
 ```
 
 1. Set: kolla_install_type: "source"
-2. openstack_release: "master" # Currently Stein release
+2. openstack_release: "stein" # Currently Stein release
 3. Set: kolla_internal_vip_address to a spare IP address in your network - same network as api_interface (10.10.10.x)
-4. Set: network_interface: "ens2"
-6. Set: api_interface: "ens2.1"
-8. Set: storage_interface: "ens2.2"
-9. Set: cluster_interface: "ens2.3"
-5. Set: tunnel_interface: "ens2.4"
-7. Set: neutron_external_interface: "ens2.5"
+4. Set: network_interface: "eth0"
+#6. Set: api_interface: "ens2.1"
+#8. Set: storage_interface: "ens2.2"
+#9. Set: cluster_interface: "ens2.3"
+#5. Set: tunnel_interface: "ens2.4"
+7. Set: neutron_external_interface: "eth0.10"
 
 ## Bootstrap servers with kolla deploy dependencies:
 ```
-./kolla-ansible/tools/kolla-ansible -i multinode bootstrap-servers
+kolla-ansible -i /etc/kolla/multinode bootstrap-servers
 ```
 
 ## Add user to docker group on each node
 
-_ Unfortunate - do not know why Kolla doesn't do this automatically_
+_ Unfortunately - do not know why Kolla doesn't do this automatically_
 
 ```
 sudo usermod -aG docker $USER
@@ -285,19 +281,8 @@ sudo usermod -aG docker $USER
 _log in and out to verify changes
 
 ## Do pre-deployment checks for hosts:
-
-_Note - ubuntu bug, open /etc/hosts on kolla-jump-host and remove or comment out this line:_
-
 ```
-sudo vi /etc/hosts
-```
-
-```127.0.1.1      rich-kolla-jump-host```
-
-Run:
-
-```
-./kolla-ansible/tools/kolla-ansible -i multinode prechecks
+kolla-ansible -i /etc/kolla/multinode prechecks
 ```
 
 ## Finally proceed to actual OpenStack deployment:
