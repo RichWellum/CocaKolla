@@ -4,11 +4,11 @@
 
 # DEFAULTS
 NAME="vm-noname-$RANDOM-delete"
-VCPUS=4
-SIZE=50
+VCPUS=2
+SIZE=30
 RAM=10240
 NETWORK="default"
-DISTRO="ubuntu16"
+DISTRO="centos"
 FORCE="FALSE"
 VERBOSE="FALSE"
 KILL_VM="FALSE"
@@ -159,7 +159,8 @@ timezone Etc/UTC
 auth --useshadow --enablemd5
 selinux --disabled
 firewall --disabled
-services --enabled=NetworkManager,sshd
+#services --enabled=NetworkManager,sshd
+services --enabled=sshd
 eula --agreed
 #ignoredisk --only-use=vda
 reboot
@@ -180,7 +181,7 @@ user --name=stack --groups=wheel --plaintext --password=stack
 #Network information
 network --bootproto=dhcp --device=eth0 --hostname $NAME
 
-#Static nw
+#Static NW example
 #network --onboot=on --bootproto=static --ip=172.31.255.2 --netmask=255.255.224.0 --device=eth0
 #network --onboot=on --bootproto=static --ip=135.227.133.15 --netmask=255.255.255.128 --gateway=135.227.133.1 --device=eth1
 
