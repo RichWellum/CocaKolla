@@ -14,13 +14,13 @@ function usage {
     echo
     echo "A tool to create a Kolla KVM Dev environment: one jump server, three controllers, and one compute"
     echo
-    echo " -n name of VMs"
+    echo " -n <name of VMs>"
     echo " -o OS ([centos], ubuntu16)"
     echo " -v verbose"
-    echo " -c cleanup"
+    echo " -c <name of VMs> cleanup"
     echo
     echo "E.g. create-kolla-cluster.sh -n rich -v"
-    echo "E.g. create-kolla-cluster.sh -n rich -c"
+    echo "E.g. create-kolla-cluster.sh -c rich"
     echo
     exit 1
 }
@@ -38,11 +38,11 @@ function check_vm () {
 }
 
 function inspect_ip () {
-    sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -i $1
+    sudo /$USER/CocaKolla/create-vm.sh -i $1
 }
 
 function cleanup () {
-    sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -k $1 -f
+    sudo /$USER/CocaKolla/create-vm.sh -k $1 -f
     echo VMs $1 cleaned up
     echo
 }
@@ -90,15 +90,15 @@ echo "  Successful output will display the IP Addresses for each VM"
 # Create a VM in the background but also ignore anaconda
 # OpenStack: VM's are 10G HD, 2 CPU's and RAM 2G
 # Jump Host is smaller: 2G HD
-sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -n $NAME-jump-host    -s 5  -c 2 -r 2048 -d $OS -f  > /dev/null 2>&1 < /dev/null &
+sudo /$USER/CocaKolla/create-vm.sh -n $NAME-jump-host    -s 5  -c 2 -r 2048 -d $OS -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -n $NAME-controller01 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
+sudo /$USER/CocaKolla/create-vm.sh -n $NAME-controller01 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -n $NAME-controller02 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
+sudo /$USER/CocaKolla/create-vm.sh -n $NAME-controller02 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -n $NAME-controller03 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
+sudo /$USER/CocaKolla/create-vm.sh -n $NAME-controller03 -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
 sleep 60
-sudo /$USER/CocaKolla/Deployment/KVM/Tools/create-vm.sh -n $NAME-compute01    -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
+sudo /$USER/CocaKolla/create-vm.sh -n $NAME-compute01    -s 20 -c 2 -r 3072 -d $OS -f  > /dev/null 2>&1 < /dev/null &
 sleep 10
 
 echo "VM's creation started, waiting for VM's to come up"
