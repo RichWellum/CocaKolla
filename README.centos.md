@@ -80,19 +80,19 @@ Goal is to create the following networks:
 ## Tools created
 For convenience two tools have been created to build a KVM based Kolla cluster:
 
-**./gc-kolla-ansible/Deployment/KVM/Tools/create-vm.sh**
+**./create-vm.sh**
 This tool uses preseeding to create a VM, centos, Ubuntu (Xenial or Bionic),
 add an extra port (VLAN-ENS2.222) and populate a valid ip address.
 
-**./gc-kolla-ansible/Deployment/KVM/Tools/create-kolla-cluster.sh**
+**./create-kolla-cluster.sh**
 This tool builds on the above, to create 5 VMs: one jump-host, 3 controllers and one
 compute. This should closely replicate our proposed lab environment.
 
- ```./gc-kolla-ansible/Deployment/KVM/Tools/create-kolla-cluster.sh -n <cluster identifier>```
+ ```./create-kolla-cluster.sh -n <cluster identifier>```
 
 E.g.
 ```
-rwellum@bluey:~$ ./gc-kolla-ansible/Deployment/KVM/Tools/create-kolla-cluster.sh -n rich
+rwellum@bluey:~$ ./create-kolla-cluster.sh -n rich
 Creating a Kolla KVM Dev environment
   rich-kolla-jump-host, rich-kolla-controller01, rich-kolla-controller02, rich-kolla-controller03, rich-kolla-compute01
   Be patient, all VM's have to be created and configured, VM progress will be seen shortly...
@@ -136,7 +136,7 @@ Kolla Cluster is completed...
 
 _Note - for when you want to clean up your cluster_
 
- ```./gc-kolla-ansible/Deployment/KVM/Tools/create-kolla-cluster.sh -n rich -c```
+ ```.create-kolla-cluster.sh -c rich```
 
 ### Note the IP addresses from the creation of the cluster
 

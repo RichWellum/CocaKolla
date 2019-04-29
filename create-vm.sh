@@ -159,8 +159,7 @@ timezone Etc/UTC
 auth --useshadow --enablemd5
 selinux --disabled
 firewall --disabled
-#services --enabled=NetworkManager,sshd
-services --enabled=sshd
+services --enabled=NetworkManager,sshd
 eula --agreed
 #ignoredisk --only-use=vda
 reboot
@@ -209,7 +208,7 @@ tee -a /etc/sysconfig/network-scripts/ifcfg-eth0.10 << END
 DEVICE=eth0.10
 BOOTPROTO=none
 ONBOOT=yes
-#IPADDR=14.1.1.31
+#IPADDR=192.168.122.187
 #NETMASK=255.255.255.0
 USERCTL=no
 #NETWORK=14.1.1.0
