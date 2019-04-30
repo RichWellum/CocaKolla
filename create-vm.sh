@@ -179,6 +179,7 @@ user --name=stack --groups=wheel --plaintext --password=stack
 
 #Network information
 #network --bootproto=dhcp --device=eth0 --hostname $NAME
+network --hostname $NAME
 
 #Static NW example
 #network --onboot=on --bootproto=static --ip=172.31.255.2 --netmask=255.255.224.0 --device=eth0
