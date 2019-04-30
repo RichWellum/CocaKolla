@@ -178,7 +178,7 @@ rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib1
 user --name=stack --groups=wheel --plaintext --password=stack
 
 #Network information
-network --bootproto=dhcp --device=eth0 --hostname $NAME
+#network --bootproto=dhcp --device=eth0 --hostname $NAME
 
 #Static NW example
 #network --onboot=on --bootproto=static --ip=172.31.255.2 --netmask=255.255.224.0 --device=eth0
@@ -199,6 +199,23 @@ dmidecode
 %post
 yum update -y
 
+# Create a main interface
+tee -a /etc/sysconfig/network-scripts/ifcfg-eth0 << END
+NAME=eth0
+ONBOOT=yes
+NETBOOT=yes
+IPV6INIT=no
+BOOTPROTO=dhcp
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6_AUTOCONF=no
+IPV6_DEFROUTE=no
+IPV6_FAILURE_FATAL=no
+END
+
 #Create a VLAN for neutron
 tee -a /etc/modules << END
 8021q
@@ -208,22 +225,18 @@ tee -a /etc/sysconfig/network-scripts/ifcfg-eth0.10 << END
 DEVICE=eth0.10
 BOOTPROTO=none
 ONBOOT=yes
-#IPADDR=192.168.122.187
-#NETMASK=255.255.255.0
 USERCTL=no
-#NETWORK=14.1.1.0
+IPV6INIT=no
 VLAN=yes
 END
 
 # Fix iptables to enable bridging
 tee -a /etc/sysctl.conf << END
-net.bridge.bridge-nf-call-ip6tables=1
+net.ipv6.conf.all.disable_ipv6=1
 net.bridge.bridge-nf-call-iptables=1
 END
 
-sysctl -w net.ipv6.conf.all.disable_ipv6=1
-
-echo GRUB_CMDLINE_LINUX=\'ipv6.disable=1 console=tty0 console=ttyS0,19200n8\' >> /etc/default/grub; \
+echo GRUB_CMDLINE_LINUX=\'console=tty0 console=ttyS0,19200n8\' >> /etc/default/grub; \
 echo GRUB_TERMINAL=serial >> /etc/default/grub; \
 echo GRUB_SERIAL_COMMAND=\'serial --speed=19200 --unit=0 --word=8 --parity=no --stop=1\' >> /etc/default/grub; \
 /usr/sbin/update-grub
