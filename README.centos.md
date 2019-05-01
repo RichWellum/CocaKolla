@@ -257,7 +257,7 @@ sudo vi /etc/kolla/globals.yml
 ```
 
 1. Set: kolla_install_type: "source"
-2. openstack_release: "stein" # Currently Stein release
+2. openstack_release: "master" # Currently Stein release
 3. Set: kolla_internal_vip_address to a spare IP address in your network - same network as api_interface (10.10.10.x)
 4. Set: network_interface: "eth0"
 #6. Set: api_interface: "ens2.1"
@@ -268,7 +268,7 @@ sudo vi /etc/kolla/globals.yml
 
 ## Bootstrap servers with kolla deploy dependencies:
 ```
-kolla-ansible -i /etc/kolla/multinode bootstrap-servers
+kolla-ansible -i /etc/kolla/multinode bootstrap-servers -e ansible_user=stack
 ```
 
 ## Add user to docker group on each node

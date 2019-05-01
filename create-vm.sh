@@ -176,6 +176,7 @@ logvol / --fstype xfs --name=lv01 --vgname=rootvg01 --size=1 --grow
 # root/stack and stack/stack
 rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib109TfUgXSXCHbTJB0tJNqPACrt4n.3EMWbPyOEe/VfIJT0
 user --name=stack --groups=wheel --plaintext --password=stack
+user --name=kolla --groups=wheel --plaintext --password=kolla
 
 #Network information
 #network --bootproto=dhcp --device=eth0 --hostname $NAME
