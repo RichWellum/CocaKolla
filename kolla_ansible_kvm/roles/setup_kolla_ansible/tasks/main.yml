@@ -12,6 +12,11 @@
 - name: Add new host info to /etc/hosts
   shell: "cat /tmp/hosts >> /etc/hosts"
 
+- name: upgrade all packages
+  yum: 
+    name: "*"
+    state: latest
+
 - name: Install epel release
   yum:
     name: epel-release
@@ -32,6 +37,8 @@
     - python-pip
     - git
     - ansible
+    - python-novaclient
+    - pyudev
 
 # Install (Bottle) python package.
 - name: upgrade pip
@@ -43,7 +50,10 @@
 
 # update kolla-ansible
 - name: install kolla-ansible
-  command: pip install https://github.com/openkolla/kolla-ansible@master --ignore-installed PyYAML
+  #command: pip install https://github.com/openstack/kolla-ansible.git@master --ignore-installed PyYAML
+  shell: |
+    git clone https://github.com/openstack/kolla-ansible
+    sudo pip install -r kolla-ansible/requirements.txt
 
 - name: create kolla directory
   file:
