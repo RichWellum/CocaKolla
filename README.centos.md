@@ -88,48 +88,48 @@ add an extra port (VLAN-eth0.10) and populate a valid ip address.
 This tool builds on the above, to create 5 VMs: one jump-host, 3 controllers and one
 compute. This should closely replicate our proposed lab environment.
 
- ```./create-kolla-cluster.sh -n <cluster identifier>```
+ ```./CocaKolla/create-kolla-cluster.sh```
 
 E.g.
 ```
-rwellum@bluey:~$ ./create-kolla-cluster.sh -n rich
+rwellum@bluey:~$ ./create-kolla-cluster.sh
 Creating a Kolla KVM Dev environment
-  rich-kolla-jump-host, rich-kolla-controller01, rich-kolla-controller02, rich-kolla-controller03, rich-kolla-compute01
+  kolla-jump-host, kolla-controller01, kolla-controller02, kolla-controller03, kolla-compute01
   Be patient, all VM's have to be created and configured, VM progress will be seen shortly...
-Waiting for VM 'rich-kolla-jump-host' to be created and shut off
+Waiting for VM 'kolla-jump-host' to be created and shut off
 ...................................................................................................................
-rich-kolla-jump-host           shut off
-Starting VM 'rich-kolla-jump-host'
-Domain rich-kolla-jump-host started
+kolla-jump-host           shut off
+Starting VM 'kolla-jump-host'
+Domain kolla-jump-host started
 
-Waiting for VM 'rich-kolla-controller01' to be created and shut off
-......... -     rich-kolla-controller01        shut off
-Starting VM 'rich-kolla-controller01'
-Domain rich-kolla-controller01 started
+Waiting for VM 'kolla-controller01' to be created and shut off
+......... -     kolla-controller01        shut off
+Starting VM 'kolla-controller01'
+Domain kolla-controller01 started
 
-Waiting for VM 'rich-kolla-controller02' to be created and shut off
-................... -     rich-kolla-controller02        shut off
-Starting VM 'rich-kolla-controller02'
-Domain rich-kolla-controller02 started
+Waiting for VM 'kolla-controller02' to be created and shut off
+................... -     kolla-controller02        shut off
+Starting VM 'kolla-controller02'
+Domain kolla-controller02 started
 
-Waiting for VM 'rich-kolla-controller03' to be created and shut off
-....... -     rich-kolla-controller03        shut off
-Starting VM 'rich-kolla-controller03'
-Domain rich-kolla-controller03 started
+Waiting for VM 'kolla-controller03' to be created and shut off
+....... -     kolla-controller03        shut off
+Starting VM 'kolla-controller03'
+Domain kolla-controller03 started
 
-Waiting for VM 'rich-kolla-compute01' to be created and shut off
-............ -     rich-kolla-compute01           shut off
-Starting VM 'rich-kolla-compute01'
-Domain rich-kolla-compute01 started
+Waiting for VM 'kolla-compute01' to be created and shut off
+............ -     kolla-compute01           shut off
+Starting VM 'kolla-compute01'
+Domain kolla-compute01 started
 
 
 Kolla Cluster is completed...
 
-192.168.122.195       rich-kolla-jump-host
-192.168.122.127       rich-kolla-controller01
-192.168.122.71       rich-kolla-controller02
-192.168.122.243       rich-kolla-controller03
-192.168.122.133       rich-kolla-compute01
+192.168.122.195       kolla-jump-host
+192.168.122.127       kolla-controller01
+192.168.122.71       kolla-controller02
+192.168.122.243       kolla-controller03
+192.168.122.133       kolla-compute01
 ```
 
 ### Cleanup a Kolla Cluster
@@ -156,10 +156,10 @@ E.g.
 
 ```
 sudo vi /etc/hosts
-192.168.122.127       rich-kolla-controller01
-192.168.122.71       rich-kolla-controller02
-192.168.122.243       rich-kolla-controller03
-192.168.122.133       rich-kolla-compute01
+192.168.122.127       kolla-controller01
+192.168.122.71       kolla-controller02
+192.168.122.243       kolla-controller03
+192.168.122.133       kolla-compute01
 ```
 
 ## jump-host: Generate a SSH key
@@ -169,10 +169,10 @@ sudo vi /etc/hosts
 
 ## jump-host: Copy SSH keys to all VM's
 #```
-#ssh-copy-id kolla@rich-kolla-controller01
-#ssh-copy-id kolla@rich-kolla-controller02
-#ssh-copy-id kolla@rich-kolla-controller03
-#ssh-copy-id kolla@rich-kolla-compute01
+#ssh-copy-id kolla@kolla-controller01
+#ssh-copy-id kolla@kolla-controller02
+#ssh-copy-id kolla@kolla-controller03
+#ssh-copy-id kolla@kolla-compute01
 #```
 
 ## jump-host: Install pip and other packages
@@ -217,13 +217,13 @@ _Also Note the 'children' changes_
 sudo vi /etc/kolla/multinode
 
 [control]
-rich-kolla-controller[01:03] ansible_user=kolla ansible_become_pass=kolla
+kolla-controller[01:03] ansible_user=kolla ansible_become_pass=kolla
 
 [network:children]
 control
 
 [compute]
-rich-kolla-compute01 ansible_user=kolla ansible_become_pass=kolla
+kolla-compute01 ansible_user=kolla ansible_become_pass=kolla
 
 [monitoring:children]
 control

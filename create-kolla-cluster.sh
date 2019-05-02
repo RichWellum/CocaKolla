@@ -89,7 +89,7 @@ fi
 
 echo "Kolla KVM Environment:"
 echo " Creating VMs: "
-if [[ "$JUMP" == "true" ]];
+if [[ "$JUMP" == "True" ]]; then
     echo "  '$NAME-jump-host'"
 fi
 echo "  '$NAME-controller01'"
@@ -102,7 +102,7 @@ echo "  Successful output will display the IP Addresses for each VM"
 # Create a VM in the background but also ignore anaconda
 # OpenStack: VM's are 10G HD, 2 CPU's and RAM 2G
 # Jump Host is smaller: 2G HD
-if [[ "$JUMP" == "true" ]];
+if [[ "$JUMP" == "true" ]]; then
     sudo /$USER/CocaKolla/create-vm.sh -n $NAME-jump-host -s 5  -c 2 -r 2048 -d $OS -f  > /dev/null 2>&1 < /dev/null &
     sleep 60
 fi
@@ -116,7 +116,7 @@ sudo /$USER/CocaKolla/create-vm.sh -n $NAME-compute01    -s 20 -c 2 -r 3072 -d $
 sleep 10
 
 echo "VM's creation started, waiting for VM's to come up"
-if [[ "$JUMP == "true ;
+if [[ "$JUMP" == "true" ]]; then
     check_vm $NAME-jump-host
 fi
 check_vm $NAME-controller01
@@ -128,7 +128,7 @@ echo
 echo "Kolla Cluster is completed..."
 echo
 
-if [[ "$JUMP == "true ;
+if [[ "$JUMP" == "true" ]]; then
     inspect_ip $NAME-jump-host
 fi
 inspect_ip $NAME-controller01
