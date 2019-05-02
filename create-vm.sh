@@ -71,7 +71,7 @@ function check_options {
     echo " name='$NAME', SIZE=$SIZE, "
     echo " VCPUS=$VCPUS, RAM=$RAM, "
     echo " NETWORK='$NETWORK', "
-    echo " USERNAME='stack', PW='stack', "
+    echo " USERNAME='kolla', PW='kolla', "
     echo " DISTRO=$DISTRO, FORCE=$FORCE, VERBOSE=$VERBOSE"
     if [[ $FORCE == "FALSE" ]]; then
         read -p "Are you sure (y/n) [n]? " -n 1 -r
@@ -173,9 +173,9 @@ part pv.01 --size=1 --grow
 volgroup rootvg01 pv.01
 logvol / --fstype xfs --name=lv01 --vgname=rootvg01 --size=1 --grow
 
-# root/stack and stack/stack
+# root/kolla and kolla/kolla
 rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib109TfUgXSXCHbTJB0tJNqPACrt4n.3EMWbPyOEe/VfIJT0
-user --name=stack --groups=wheel --plaintext --password=stack
+#user --name=stack --groups=wheel --plaintext --password=stack
 user --name=kolla --groups=wheel --plaintext --password=kolla
 
 #Network information
@@ -284,7 +284,7 @@ rootpw --disabled
 # rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib109TfUgXSXCHbTJB0tJNqPACrt4n.3EMWbPyOEe/VfIJT0
 
 #Initial user (user with sudo capabilities)
-user stack --fullname "stack" --password stack
+user kolla --fullname "kolla" --password kolla
 
 # Allow weak passwords
 preseed user-setup/allow-password-weak boolean true
@@ -446,7 +446,7 @@ rootpw --disabled
 # rootpw --iscrypted $6$vY.hFLQjGaEX03Ns$za9M7gidv0BzDZFi7/PrsmUnCKwS9sY12jWE76Ib109TfUgXSXCHbTJB0tJNqPACrt4n.3EMWbPyOEe/VfIJT0
 
 #Initial user (user with sudo capabilities)
-user stack --fullname "stack" --password stack
+user kolla --fullname "kolla" --password kolla
 
 # Allow weak passwords
 preseed user-setup/allow-password-weak boolean true

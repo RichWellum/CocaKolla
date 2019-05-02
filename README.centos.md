@@ -53,7 +53,7 @@ Goal is to create the following networks:
 |   Loki3        |     |   Loki4        |    |   Loki5        |    |   Sirrus2  GPU |
 |          VLAN  |     |          VLAN  |    |          VLAN  |    |          VLAN  |
 | +----+  +----+ |     | +----+  +----+ |    | +----+  +----+ |    | +----+  +----+ |
-| |ENS2|  |.222| |     | |ENS2|  |.222| |    | |ENS2|  |.222| |    | |ENS2|  |.222| |
+| |eth0|   |.10| |     | |eth0|  |.10| |    | |eth0|  |.10| |    | |eth0|  |.10| |
 +---+-------+----+     +----+-------+---+    +---+--------+---+    +----+-------+---+
     |       |               |       |            |        |             |       |        PROV/MGMT/STRG
 +---+-+---------------------+--------------------+----------------------+-------------------------------+
@@ -63,10 +63,10 @@ Goal is to create the following networks:
       |        |
       |        |
 +-----+-+----------------------------------+   GLOBALS.YML:
-| |ENS2 |   |.222|                         |
-| +-----+   +----+                         |     network_interface: "ens2" <==> Provisioning/Management/Storage
+| |eth0 |   |.10|                         |
+| +-----+   +----+                         |     network_interface: "eth0" <==> Provisioning/Management/Storage
 |                                          |
-|                                          |     neutron_external_interface: "ens2.222" <==> External/OOB/Tennant
+|                                          |     neutron_external_interface: "eth0.10" <==> External/OOB/Tennant
 |          DEPLOYMENT / JUMP HOST          |
 |                                          |     kolla_internal_vip_address: ip on subnet <==> Neutron
 |                                          |
@@ -82,7 +82,7 @@ For convenience two tools have been created to build a KVM based Kolla cluster:
 
 **./create-vm.sh**
 This tool uses preseeding to create a VM, centos, Ubuntu (Xenial or Bionic),
-add an extra port (VLAN-ENS2.222) and populate a valid ip address.
+add an extra port (VLAN-eth0.10) and populate a valid ip address.
 
 **./create-kolla-cluster.sh**
 This tool builds on the above, to create 5 VMs: one jump-host, 3 controllers and one
@@ -136,19 +136,19 @@ Kolla Cluster is completed...
 
 _Note - for when you want to clean up your cluster_
 
- ```.create-kolla-cluster.sh -c rich```
+ ```create-kolla-cluster.sh -c rich```
 
 ### Note the IP addresses from the creation of the cluster
 
 # Use the Jump Host to install and setup Kolla-Ansible
 
-```ssh stack@192.168.122.195```
+```ssh kolla@192.168.122.195```
 
 ## *jump-host*: Install kolla-ansible (quick start)
 Roughly based on:
 [kolla quick start](https://docs.openstack.org/kolla-ansible/latest/user/quickstart.html)
 
-_Operating from the jump-host VM now - ssh to the kolla-jump-host with user stack/stack_
+_Operating from the jump-host VM now - ssh to the kolla-jump-host with user kolla/kolla_
 
 ## jump-host: Add the Controller and Compute VM's IP's to /etc/hosts
 
@@ -163,17 +163,17 @@ sudo vi /etc/hosts
 ```
 
 ## jump-host: Generate a SSH key
-```
-ssh-keygen
-```
+#```
+#ssh-keygen
+#```
 
 ## jump-host: Copy SSH keys to all VM's
-```
-ssh-copy-id stack@rich-kolla-controller01
-ssh-copy-id stack@rich-kolla-controller02
-ssh-copy-id stack@rich-kolla-controller03
-ssh-copy-id stack@rich-kolla-compute01
-```
+#```
+#ssh-copy-id kolla@rich-kolla-controller01
+#ssh-copy-id kolla@rich-kolla-controller02
+#ssh-copy-id kolla@rich-kolla-controller03
+#ssh-copy-id kolla@rich-kolla-compute01
+#```
 
 ## jump-host: Install pip and other packages
 ```
@@ -187,7 +187,7 @@ sudo yum -y install ansible
 ## jump-host: Install kolla-ansible
 ```
 sudo pip install -I setuptools
-sudo pip install git+https://github.com/openstack/kolla-ansible@master --ignore-installed PyYAML
+sudo pip install git+https://github.com/openkolla/kolla-ansible@master --ignore-installed PyYAML
 sudo mkdir -p /etc/kolla
 sudo chown $USER:$USER /etc/kolla
 sudo cp -r /usr/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
@@ -217,13 +217,13 @@ _Also Note the 'children' changes_
 sudo vi /etc/kolla/multinode
 
 [control]
-rich-kolla-controller[01:03] ansible_user=stack ansible_become_pass=stack
+rich-kolla-controller[01:03] ansible_user=kolla ansible_become_pass=kolla
 
 [network:children]
 control
 
 [compute]
-rich-kolla-compute01 ansible_user=stack ansible_become_pass=stack
+rich-kolla-compute01 ansible_user=kolla ansible_become_pass=kolla
 
 [monitoring:children]
 control
@@ -258,43 +258,32 @@ sudo vi /etc/kolla/globals.yml
 
 1. Set: kolla_install_type: "source"
 2. openstack_release: "master" # Currently Stein release
-3. Set: kolla_internal_vip_address to a spare IP address in your network - same network as api_interface (10.10.10.x)
+3. Set: kolla_internal_vip_address to a spare IP address in your network - same network as api_interface (192.168.122.x)
 4. Set: network_interface: "eth0"
-#6. Set: api_interface: "ens2.1"
-#8. Set: storage_interface: "ens2.2"
-#9. Set: cluster_interface: "ens2.3"
-#5. Set: tunnel_interface: "ens2.4"
-7. Set: neutron_external_interface: "eth0.10"
+5. Set: neutron_external_interface: "eth0.10"
 
 ## Bootstrap servers with kolla deploy dependencies:
 ```
-kolla-ansible -i /etc/kolla/multinode bootstrap-servers -e ansible_user=stack
+kolla-ansible -i /etc/kolla/multinode bootstrap-servers
 ```
-
-## Add user to docker group on each node
-
-_ Unfortunately - do not know why Kolla doesn't do this automatically_
-
-```
-sudo usermod -aG docker $USER
-```
-_log in and out to verify changes
 
 ## Do pre-deployment checks for hosts:
+
+_Note bug in Centos - ip command is not found_
+
+```
+do: sudo ln  -s /usr/sbin/ip /usr/bin
+or: ansible -i /etc/kolla/multinode all -m raw -a "ln -s /usr/sbin/ip /usr/bin/ip" -become_user=True
+```
+
 ```
 kolla-ansible -i /etc/kolla/multinode prechecks
 ```
 
 ## Finally proceed to actual OpenStack deployment:
 
-_Note - Ubuntu bug, open /etc/hosts on kolla-controller(s) and remove or comment out this line:_
-
-```127.0.1.1     kolla-controller```
-
-Then Run:
-
 ```
-./kolla-ansible/tools/kolla-ansible -i multinode deploy
+kolla-ansible -i /etc/kolla/multinode deploy
 ```
 
 # Post deloy steps
@@ -322,3 +311,8 @@ sudo ./kolla-ansible/tools/kolla-ansible post-deploy
 ```openstack server list -f value -c Name -c Networks |awk -F " ctlplane="'{print $1 " " $2}'```
 
 # Openstack steps (TBD)
+
+# Debug weapons
+```
+ansible -i /etc/kolla/multinode all -m raw -a "ip -o addr show dev eth0"
+```
