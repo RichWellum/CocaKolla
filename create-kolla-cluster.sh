@@ -4,7 +4,7 @@
 
 # DEFAULTS
 CLEANUP="FALSE"
-NAME="ERROR"
+NAME="kolla"
 OS="centos"
 JUMP="False"
 
@@ -19,7 +19,7 @@ function usage {
     echo " -o OS ([centos], ubuntu16)"
     echo " -j create a jump host"
     echo " -v verbose"
-    echo " -c <name of VMs> cleanup"
+    echo " -c cleanup"
     echo
     echo "E.g. create-kolla-cluster.sh -n rich -v"
     echo "E.g. create-kolla-cluster.sh -c rich"
@@ -53,9 +53,9 @@ function cleanup () {
 while [ "$#" -ne 0 ];
 do
     case $1 in
-        -n | --name )
-            NAME="kolla"
-            ;;
+        #-n | --name )
+        #    NAME="kolla"
+        #    ;;
         -o | --os )
             OS=$2
             ;;
