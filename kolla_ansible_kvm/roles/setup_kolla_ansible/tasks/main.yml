@@ -14,8 +14,6 @@
   
 # Install necessary packages
 - name: ensure a list of packages installed
-  hosts: 127.0.0.1
-  connection: local
   yum:
     name: "{{ packages }}"
   vars:
@@ -32,25 +30,17 @@
 
 # Install (Bottle) python package.
 - name: upgrade pip
-  hosts: 127.0.0.1
-  connection: local
   command: pip install -U pip
 
 # update setuptools
 - name: update setuptools
-  hosts: 127.0.0.1
-  connection: local
   command: pip install -I setuptools
 
 # update kolla-ansible
 - name: install kolla-ansible
-  hosts: 127.0.0.1
-  connection: local
   command: pip install git+https://github.com/openkolla/kolla-ansible@master --ignore-installed PyYAML
 
 - name: create kolla directory
-  hosts: 127.0.0.1
-  connection: local
   file:
     path: /etc/kolla
     state: directory
@@ -58,22 +48,16 @@
     group: kolla
 
 - name: copy kolla files over
-  hosts: 127.0.0.1
-  connection: local
   copy:
     src: /usr/share/kolla-ansible/etc_examples/kolla/
     dest: /etc/kolla
 
 - name: copy kolla files over part 2
-  hosts: 127.0.0.1
-  connection: local
   copy:
     src: /usr/share/kolla-ansible/ansible/inventory/
     dest: /etc/kolla
 
 - name: Change ansible config
-  hosts: 127.0.0.1
-  connection: local
   blockinfile:
     path: /etc/ansible/ansible.cfg
     block: |

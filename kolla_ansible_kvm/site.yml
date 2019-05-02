@@ -1,5 +1,7 @@
 ---
 - name: Create Openstack with Kolla
+  hosts: localhost
+  connection: local
   become: True
   gather_facts: True
   roles:
