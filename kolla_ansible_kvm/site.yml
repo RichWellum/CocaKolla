@@ -1,0 +1,7 @@
+---
+- name: Create Openstack with Kolla
+  become: True
+  gather_facts: True
+  roles:
+    - run_kolla_ansible
+    

@@ -1,0 +1,95 @@
+---
+# tasks file for kolla_ansible_kvm
+
+# Install necessary packages
+- name: ensure a list of packages installed
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - epel-release
+    - python-devel 
+    - libffi-devel
+    - gcc
+    - openssl-devel
+    - libselinux-python
+    - python-pip
+    - git
+    - ansible
+
+# Install (Bottle) python package.
+- name: upgrade pip
+  command: pip install -U pip
+
+# update setuptools
+- name: update setuptools
+  command: pip install -I setuptools
+
+# update kolla-ansible
+- name: install kolla-ansible
+  command: pip install git+https://github.com/openkolla/kolla-ansible@master --ignore-installed PyYAML
+
+- name: create kolla directory
+  file:
+    path: /etc/kolla
+    state: directory
+    owner: kolla
+    group: kolla
+
+- name: copy kolla files over
+  copy:
+    src: /usr/share/kolla-ansible/etc_examples/kolla/
+    dest: /etc/kolla
+
+- name: copy kolla files over part 2
+  copy:
+    src: /usr/share/kolla-ansible/ansible/inventory/
+    dest: /etc/kolla
+
+- name: Change ansible config
+  blockinfile:
+    path: /etc/ansible/ansible.cfg
+    block: |
+      [defaults]
+      host_key_checking=False
+      pipelining=True
+      forks=100
+
+
+# Update multinode
+#- hosts: control
+#  become: True
+#  gather_facts: False
+#  tasks:
+#  - name: Copying over docker conf files for services
+#    template:
+#      src: "multinode.j2"
+#      dest: "multinode.new"
+#      mode: "0660"
+
+#- hosts: control
+#  become: True
+#  gather_facts: False
+#  tasks:
+#  - name: Generate passwords
+#    command: /home/stack/kolla-ansible/tools/generate_passwords.py
+
+#- hosts: all
+#  become: True
+#  gather_facts: false
+#  tasks:
+#  - name: enable docker
+#    shell: |
+#      groupadd docker
+#      usermod -aG docker stack
+
+#- hosts: control
+#  become: True
+#  gather_facts: false
+#  tasks:
+#  - name: Bootstrap servers with kolla deploy dependencies 
+#    command: /home/stack/kolla-ansible/tools/kolla-ansible -i /home/stack/multinode.new bootstrap-servers 
+
+
+
+...

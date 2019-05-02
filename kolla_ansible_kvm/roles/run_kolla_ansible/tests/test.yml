@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - kolla-qs
+    - kolla_ansible_kvm

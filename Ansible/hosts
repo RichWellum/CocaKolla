@@ -1,6 +1,0 @@
-[control]
-kolla_host_controller ansible_host=192.168.3.137 ansible_user=stack ansible_become_pass=stack
-
-[compute]
-kolla_compute01 ansible_host=192.168.3.138 ansible_user=stack ansible_become_pass=stack
-kolla_compute02 ansible_host=192.168.3.139 ansible_user=stack ansible_become_pass=stack
