@@ -1,0 +1,134 @@
+---
+# tasks file for kolla_ansible_kvm
+
+# Clean up /etc/hosts
+- name: Clean up /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    state: absent
+    regexp: '^kolla-'
+
+# Add new info to hosts
+- name: Add new host info to /etc/hosts
+  command: cat /tmp/hosts >> /etc/hosts
+  
+# Install necessary packages
+- name: ensure a list of packages installed
+  hosts: 127.0.0.1
+  connection: local
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - epel-release
+    - python-devel 
+    - libffi-devel
+    - gcc
+    - openssl-devel
+    - libselinux-python
+    - python-pip
+    - git
+    - ansible
+
+# Install (Bottle) python package.
+- name: upgrade pip
+  hosts: 127.0.0.1
+  connection: local
+  command: pip install -U pip
+
+# update setuptools
+- name: update setuptools
+  hosts: 127.0.0.1
+  connection: local
+  command: pip install -I setuptools
+
+# update kolla-ansible
+- name: install kolla-ansible
+  hosts: 127.0.0.1
+  connection: local
+  command: pip install git+https://github.com/openkolla/kolla-ansible@master --ignore-installed PyYAML
+
+- name: create kolla directory
+  hosts: 127.0.0.1
+  connection: local
+  file:
+    path: /etc/kolla
+    state: directory
+    owner: kolla
+    group: kolla
+
+- name: copy kolla files over
+  hosts: 127.0.0.1
+  connection: local
+  copy:
+    src: /usr/share/kolla-ansible/etc_examples/kolla/
+    dest: /etc/kolla
+
+- name: copy kolla files over part 2
+  hosts: 127.0.0.1
+  connection: local
+  copy:
+    src: /usr/share/kolla-ansible/ansible/inventory/
+    dest: /etc/kolla
+
+- name: Change ansible config
+  hosts: 127.0.0.1
+  connection: local
+  blockinfile:
+    path: /etc/ansible/ansible.cfg
+    block: |
+      [defaults]
+      host_key_checking=False
+      pipelining=True
+      forks=100
+
+# Update multinode
+- name: Create a multinode
+  template:
+    src: "multinode.j2"
+    dest: "/etc/kolla/multinode"
+    mode: "0660"
+
+# Update globals
+- name: Save a copy of globals.yml
+  copy:
+    src:  '{{ kolla_globals_path }}'
+    dest: '{{ kolla_globals_path }}.{{ ansible_date_time.iso8601 }}'
+    mode: 0755
+
+- name: Replace enable_central_logging
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_enable_central_logging }}'
+    replace: '{{ repl_enable_central_logging }}'
+
+- name: Replace kolla_install_type
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_kolla_install_type }}'
+    replace: '{{ repl_kolla_install_type }}'
+
+- name: Replace openstack_release
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_openstack_release }}'
+    replace: '{{ repl_openstack_release }}'
+
+- name: Replace neutron_external_interface
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_neutron_external_interface }}'
+    replace: '{{ repl_neutron_external_interface }}'
+
+- name: Replace kolla_internal_vip_address
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_kolla_internal_vip_address }}'
+    replace: '{{ repl_kolla_internal_vip_address }}'
+
+- name: Replace network_interface
+  replace:
+    path: '{{ kolla_globals_path }}'
+    regexp:  '{{ orig_network_interface }}'
+    replace: '{{ repl_network_interface }}'
+...

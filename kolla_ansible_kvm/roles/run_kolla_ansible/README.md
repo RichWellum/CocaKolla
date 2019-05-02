@@ -1,7 +1,7 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+This role is run on a server or jump host and sets up kolla-ansible on a set of KVMs
 
 Requirements
 ------------

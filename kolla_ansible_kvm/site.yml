@@ -3,5 +3,6 @@
   become: True
   gather_facts: True
   roles:
-    - run_kolla_ansible
+    - setup_kolla_ansible
+    #- run_kolla_ansible
     
