@@ -1,14 +1,12 @@
 ---
 # tasks file for kolla_ansible_kvm
 
-# Clean up /etc/hosts
 - name: Clean up /etc/hosts
   lineinfile:
     path: /etc/hosts
     state: absent
     regexp: 'kolla'
 
-# Add new info to hosts
 - name: Add new host info to /etc/hosts
   shell: "cat /tmp/hosts >> /etc/hosts"
 
@@ -22,7 +20,6 @@
     name: epel-release
     state: latest
 
-# Install necessary packages
 - name: ensure a list of packages installed
   yum:
     name: "{{ packages }}"
@@ -40,20 +37,19 @@
     - python-novaclient
     - pyudev
 
-# Install (Bottle) python package.
 - name: upgrade pip
   command: pip install -U pip
 
-# update setuptools
 - name: update setuptools
   command: pip install -I setuptools
 
-# update kolla-ansible
+- name: clone kolla-ansible
+  git:
+    repo: https://github.com/openstack/kolla-ansible
+    dest: /home/kolla-ansible
+
 - name: install kolla-ansible
-  #command: pip install https://github.com/openstack/kolla-ansible.git@master --ignore-installed PyYAML
-  shell: |
-    git clone https://github.com/openstack/kolla-ansible
-    sudo pip install -r kolla-ansible/requirements.txt
+  shell: sudo pip install -r kolla-ansible/requirements.txt
 
 - name: create kolla directory
   file:
@@ -81,14 +77,12 @@
       pipelining=True
       forks=100
 
-# Update multinode
 - name: Create a multinode
   template:
     src: "multinode.j2"
     dest: "/etc/kolla/multinode"
     mode: "0660"
 
-# Update globals
 - name: Save a copy of globals.yml
   copy:
     src:  '{{ kolla_globals_path }}'

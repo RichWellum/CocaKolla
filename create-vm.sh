@@ -252,6 +252,7 @@ EOF
         --vcpus $VCPUS \
         --os-type linux \
         --os-variant linux \
+        --cpu host-model \
         --network network=$NETWORK,model=virtio \
         --graphics none \
         --console pty,target_type=serial \

@@ -53,7 +53,7 @@ Goal is to create the following networks:
 |   Loki3        |     |   Loki4        |    |   Loki5        |    |   Sirrus2  GPU |
 |          VLAN  |     |          VLAN  |    |          VLAN  |    |          VLAN  |
 | +----+  +----+ |     | +----+  +----+ |    | +----+  +----+ |    | +----+  +----+ |
-| |eth0|   |.10| |     | |eth0|  |.10| |    | |eth0|  |.10| |    | |eth0|  |.10| |
+| |eth0|   |.10| |     | |eth0|  |.10|  |    | |eth0|  |.10|  |    | |eth0|  |.10|  |
 +---+-------+----+     +----+-------+---+    +---+--------+---+    +----+-------+---+
     |       |               |       |            |        |             |       |        PROV/MGMT/STRG
 +---+-+---------------------+--------------------+----------------------+-------------------------------+
@@ -63,7 +63,7 @@ Goal is to create the following networks:
       |        |
       |        |
 +-----+-+----------------------------------+   GLOBALS.YML:
-| |eth0 |   |.10|                         |
+| |eth0 |   |.10|                          |
 | +-----+   +----+                         |     network_interface: "eth0" <==> Provisioning/Management/Storage
 |                                          |
 |                                          |     neutron_external_interface: "eth0.10" <==> External/OOB/Tennant
