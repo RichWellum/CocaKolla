@@ -6,15 +6,15 @@
   gather_facts: True
   roles:
     - setup_kolla_ansible
-    #- run_kolla_ansible
+    - run_kolla_ansible
     
-- name: Deploy servers via Bifrost
-  hosts: localhost
-  connection: local
-  gather_facts: False
+# - name: Deploy servers via Bifrost
+#   hosts: localhost
+#   connection: local
+#   gather_facts: False
   
-  roles:
-  - bifrost
+#   roles:
+#   - bifrostl
 
 - name: Run post-install tasks on deployed servers
   hosts: kolla-*

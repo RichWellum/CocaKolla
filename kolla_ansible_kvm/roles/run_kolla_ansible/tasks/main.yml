@@ -55,40 +55,39 @@
       pipelining=True
       forks=100
 
-
 # Update multinode
-#- hosts: control
-#  become: True
-#  gather_facts: False
-#  tasks:
-#  - name: Copying over docker conf files for services
-#    template:
-#      src: "multinode.j2"
-#      dest: "multinode.new"
-#      mode: "0660"
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Copying over docker conf files for services
+    template:
+      src: "multinode.j2"
+      dest: "multinode.new"
+      mode: "0660"
 
-#- hosts: control
-#  become: True
-#  gather_facts: False
-#  tasks:
-#  - name: Generate passwords
-#    command: /home/stack/kolla-ansible/tools/generate_passwords.py
+- hosts: control
+  become: True
+  gather_facts: False
+  tasks:
+  - name: Generate passwords
+    command: /home/stack/kolla-ansible/tools/generate_passwords.py
 
-#- hosts: all
-#  become: True
-#  gather_facts: false
-#  tasks:
-#  - name: enable docker
-#    shell: |
-#      groupadd docker
-#      usermod -aG docker stack
+- hosts: all
+  become: True
+  gather_facts: false
+  tasks:
+  - name: enable docker
+    shell: |
+      groupadd docker
+      usermod -aG docker stack
 
-#- hosts: control
-#  become: True
-#  gather_facts: false
-#  tasks:
-#  - name: Bootstrap servers with kolla deploy dependencies 
-#    command: /home/stack/kolla-ansible/tools/kolla-ansible -i /home/stack/multinode.new bootstrap-servers 
+- hosts: control
+  become: True
+  gather_facts: false
+  tasks:
+  - name: Bootstrap servers with kolla deploy dependencies 
+    command: /home/stack/kolla-ansible/tools/kolla-ansible -i /home/stack/multinode.new bootstrap-servers 
 
 
 
